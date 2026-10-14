@@ -17,11 +17,13 @@ import {
   Package,
   Loader2,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Scale
 } from 'lucide-react';
 
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
+import { useCompareStore } from '../store/compareStore';
 import { productApi, categoryApi } from '../api/services';
 import { Product, Category } from '../types';
 import { formatCurrency } from './ProductCard';
@@ -34,6 +36,7 @@ export const Navbar: React.FC = () => {
 
   const { user, isAuthenticated, isAdmin, logout } = useAuthStore();
   const totalCartItems = useCartStore((state) => state.getTotalItems());
+  const compareCount = useCompareStore((state) => state.products.length);
   const [keyword, setKeyword] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -259,6 +262,20 @@ export const Navbar: React.FC = () => {
             <span className="sm:hidden">Build PC</span>
           </Link>
 
+          {/* Compare */}
+          <Link
+            to="/compare"
+            className="relative p-2 text-slate-700 hover:text-red-600 transition-colors"
+            title="So sánh sản phẩm"
+          >
+            <Scale className="w-6 h-6" />
+            {compareCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-slate-900 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                {compareCount}
+              </span>
+            )}
+          </Link>
+
           {/* Cart */}
           <Link
             to="/cart"
@@ -304,6 +321,14 @@ export const Navbar: React.FC = () => {
                     <p className="text-sm font-bold text-slate-900 truncate">{user?.fullName}</p>
                     <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                   </div>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center space-x-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium"
+                  >
+                    <UserIcon className="w-4 h-4 text-slate-500" />
+                    <span>Tài khoản của tôi</span>
+                  </Link>
                   <Link
                     to="/my-orders"
                     onClick={() => setIsUserMenuOpen(false)}

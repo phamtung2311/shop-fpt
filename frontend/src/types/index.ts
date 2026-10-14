@@ -11,15 +11,19 @@ export type ComponentType =
   | 'CASE'
   | 'COOLER';
 
-export type PaymentMethod = 'COD' | 'VNPAY';
+export type PaymentMethod = 'COD' | 'VNPAY' | 'MOMO';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'COMPLETED' | 'CANCELLED';
+export type DiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
 
 export interface User {
   id: number;
   email: string;
   fullName: string;
   role: Role;
+  phone?: string;
+  address?: string;
+  isActive?: boolean;
 }
 
 export interface Category {
@@ -37,6 +41,7 @@ export interface Review {
   authorName: string;
   rating: number;
   content: string;
+  verifiedPurchase?: boolean;
   createdAt: string;
 }
 
@@ -49,6 +54,7 @@ export interface Product {
   salePrice: number;
   stockQuantity: number;
   thumbnail: string;
+  images?: string[];
   description: string;
   cpu?: string;
   ram?: string;
@@ -65,11 +71,21 @@ export interface Product {
   categoryId?: number;
   categoryName?: string;
   createdAt: string;
+  specs?: Record<string, string>;
+}
+
+export interface WarrantyOption {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  warrantyOption?: WarrantyOption;
+  installmentNote?: string;
 }
 
 export interface OrderItem {
@@ -89,10 +105,15 @@ export interface Order {
   customerPhone: string;
   shippingAddress: string;
   note?: string;
+  subtotalAmount?: number;
+  discountAmount?: number;
+  shippingFee?: number;
+  voucherCode?: string;
   totalAmount: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
+  cancelReason?: string;
   items: OrderItem[];
   createdAt: string;
 }
@@ -121,6 +142,7 @@ export interface OrderRequest {
   shippingAddress: string;
   note?: string;
   paymentMethod: PaymentMethod;
+  voucherCode?: string;
   items: OrderRequestItem[];
 }
 
@@ -132,12 +154,30 @@ export interface AuthResponse {
   role: Role;
 }
 
+export interface TopProduct {
+  id: number;
+  name: string;
+  imageUrl?: string;
+  categoryName?: string;
+  soldQuantity: number;
+  totalRevenue: number;
+}
+
+export interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+  orderCount: number;
+}
+
 export interface DashboardStats {
   totalRevenue: number;
   totalOrders: number;
   pendingOrders: number;
   totalProducts: number;
   totalUsers: number;
+  ordersByStatus?: Record<string, number>;
+  topSellingProducts?: TopProduct[];
+  monthlyRevenues?: MonthlyRevenue[];
 }
 
 export interface ApiResponse<T> {
@@ -152,5 +192,62 @@ export interface PageResponse<T> {
   totalPages: number;
   size: number;
   number: number;
+}
+
+export interface UserProfile {
+  id: number;
+  fullName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  role: Role;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface UpdateProfileRequest {
+  fullName: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface Voucher {
+  id: number;
+  code: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderValue?: number;
+  maxDiscountAmount?: number;
+  usageLimit: number;
+  usedCount: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+}
+
+export interface ApplyVoucherResponse {
+  code: string;
+  description?: string;
+  discountAmount: number;
+  finalTotal: number;
+}
+
+export interface VoucherRequest {
+  code: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderValue?: number;
+  maxDiscountAmount?: number;
+  usageLimit?: number;
+  startDate: string;
+  endDate: string;
+  isActive?: boolean;
 }
 

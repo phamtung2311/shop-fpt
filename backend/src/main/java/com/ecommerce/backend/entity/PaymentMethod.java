@@ -2,5 +2,6 @@ package com.ecommerce.backend.entity;
 
 public enum PaymentMethod {
     COD,
-    VNPAY
+    VNPAY,
+    MOMO
 }

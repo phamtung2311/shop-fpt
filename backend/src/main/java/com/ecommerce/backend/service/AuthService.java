@@ -37,7 +37,7 @@ public class AuthService {
                 .phone(request.getPhone())
                 .address(request.getAddress())
                 .role(Role.ROLE_CUSTOMER)
-                .active(true)
+                .isActive(true)
                 .build();
 
         userRepository.save(user);

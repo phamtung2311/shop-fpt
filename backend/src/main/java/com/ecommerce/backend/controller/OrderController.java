@@ -1,6 +1,7 @@
 package com.ecommerce.backend.controller;
 
 import com.ecommerce.backend.dto.ApiResponse;
+import com.ecommerce.backend.dto.CancelOrderRequest;
 import com.ecommerce.backend.dto.OrderDto;
 import com.ecommerce.backend.dto.OrderRequest;
 import com.ecommerce.backend.entity.User;
@@ -9,7 +10,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +50,37 @@ public class OrderController {
             return ResponseEntity.badRequest().body(ApiResponse.error("Vui lòng đăng nhập để xem lịch sử"));
         }
         return ResponseEntity.ok(ApiResponse.ok(orderService.getOrdersByUser(user.getEmail())));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @Operation(summary = "Khách hàng hủy đơn hàng (khi đơn còn ở trạng thái PENDING)")
+    public ResponseEntity<ApiResponse<OrderDto>> cancelOrder(
+            @PathVariable Long id,
+            @RequestBody(required = false) CancelOrderRequest request,
+            @AuthenticationPrincipal User user,
+            Authentication authentication
+    ) {
+        String email = null;
+        if (user != null) {
+            email = user.getEmail();
+        } else if (authentication != null && authentication.isAuthenticated()) {
+            email = authentication.getName();
+        }
+
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Vui lòng đăng nhập để thực hiện hủy đơn hàng"));
+        }
+
+        String cancelReason = request != null ? request.getCancelReason() : null;
+        OrderDto cancelled = orderService.cancelMyOrder(id, email, cancelReason);
+        return ResponseEntity.ok(ApiResponse.ok("Hủy đơn hàng thành công!", cancelled));
+    }
+
+    @PostMapping("/{id}/confirm-payment")
+    @Operation(summary = "Xác nhận thanh toán trực tuyến thành công (VNPAY / MOMO)")
+    public ResponseEntity<ApiResponse<OrderDto>> confirmPayment(@PathVariable Long id) {
+        OrderDto order = orderService.confirmOnlinePayment(id);
+        return ResponseEntity.ok(ApiResponse.ok("Xác nhận thanh toán thành công!", order));
     }
 }

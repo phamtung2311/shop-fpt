@@ -41,8 +41,9 @@ public class User implements UserDetails {
     @Builder.Default
     private Role role = Role.ROLE_CUSTOMER;
 
+    @Column(name = "is_active")
     @Builder.Default
-    private boolean active = true;
+    private Boolean isActive = true;
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
@@ -65,7 +66,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return active;
+        return Boolean.TRUE.equals(this.isActive);
     }
 
     @Override
@@ -75,6 +76,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return active;
+        return Boolean.TRUE.equals(this.isActive);
     }
 }

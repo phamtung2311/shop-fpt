@@ -21,6 +21,8 @@ public class OrderRequest {
 
     private String note;
 
+    private String voucherCode;
+
     @NotNull(message = "Phương thức thanh toán không được để trống")
     private PaymentMethod paymentMethod;
 

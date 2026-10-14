@@ -2,6 +2,7 @@ package com.ecommerce.backend.controller;
 
 import com.ecommerce.backend.dto.*;
 import com.ecommerce.backend.entity.OrderStatus;
+import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.service.CategoryService;
 import com.ecommerce.backend.service.OrderService;
 import com.ecommerce.backend.service.ProductService;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +28,8 @@ public class AdminController {
     private final OrderService orderService;
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final com.ecommerce.backend.service.UserService userService;
+    private final com.ecommerce.backend.service.VoucherService voucherService;
 
     @GetMapping("/stats")
     @Operation(summary = "Lấy số liệu thống kê tổng quan doanh thu, đơn hàng")
@@ -91,5 +96,68 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.ok("Đã xóa danh mục thành công!", null));
+    }
+
+    // Users Management
+    @GetMapping("/users")
+    @Operation(summary = "Lấy danh sách tất cả người dùng trong hệ thống")
+    public ResponseEntity<ApiResponse<List<UserProfileDto>>> getAllUsers() {
+        return ResponseEntity.ok(ApiResponse.ok(userService.getAllUsers()));
+    }
+
+    @PatchMapping("/users/{id}/role")
+    @Operation(summary = "Đổi vai trò người dùng (ROLE_CUSTOMER hoặc ROLE_ADMIN)")
+    public ResponseEntity<ApiResponse<UserProfileDto>> updateUserRole(
+            @PathVariable Long id,
+            @RequestBody(required = false) UpdateUserRoleRequest body,
+            @RequestParam(required = false) String role
+    ) {
+        String targetRole = body != null && body.getRole() != null ? body.getRole() : role;
+        UserProfileDto updated = userService.updateUserRole(id, targetRole);
+        return ResponseEntity.ok(ApiResponse.ok("Cập nhật vai trò người dùng thành công!", updated));
+    }
+
+    @PatchMapping("/users/{id}/status")
+    @Operation(summary = "Khóa hoặc mở khóa tài khoản người dùng")
+    public ResponseEntity<ApiResponse<UserProfileDto>> toggleUserStatus(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentAdmin,
+            Authentication authentication
+    ) {
+        String adminEmail = currentAdmin != null ? currentAdmin.getEmail() : (authentication != null ? authentication.getName() : null);
+        UserProfileDto updated = userService.toggleUserStatus(id, adminEmail);
+        String msg = Boolean.TRUE.equals(updated.getIsActive()) ? "Đã mở khóa tài khoản!" : "Đã khóa tài khoản thành công!";
+        return ResponseEntity.ok(ApiResponse.ok(msg, updated));
+    }
+
+    // Vouchers Management
+    @GetMapping("/vouchers")
+    @Operation(summary = "Lấy toàn bộ danh sách mã giảm giá")
+    public ResponseEntity<ApiResponse<List<VoucherDto>>> getAllVouchers() {
+        return ResponseEntity.ok(ApiResponse.ok(voucherService.getAllVouchers()));
+    }
+
+    @PostMapping("/vouchers")
+    @Operation(summary = "Tạo mã giảm giá mới")
+    public ResponseEntity<ApiResponse<VoucherDto>> createVoucher(@Valid @RequestBody VoucherRequest request) {
+        VoucherDto created = voucherService.createVoucher(request);
+        return ResponseEntity.ok(ApiResponse.ok("Tạo mã giảm giá thành công!", created));
+    }
+
+    @PutMapping("/vouchers/{id}")
+    @Operation(summary = "Cập nhật mã giảm giá")
+    public ResponseEntity<ApiResponse<VoucherDto>> updateVoucher(
+            @PathVariable Long id,
+            @Valid @RequestBody VoucherRequest request
+    ) {
+        VoucherDto updated = voucherService.updateVoucher(id, request);
+        return ResponseEntity.ok(ApiResponse.ok("Cập nhật mã giảm giá thành công!", updated));
+    }
+
+    @DeleteMapping("/vouchers/{id}")
+    @Operation(summary = "Xóa mã giảm giá")
+    public ResponseEntity<ApiResponse<Void>> deleteVoucher(@PathVariable Long id) {
+        voucherService.deleteVoucher(id);
+        return ResponseEntity.ok(ApiResponse.ok("Đã xóa mã giảm giá thành công!", null));
     }
 }

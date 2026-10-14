@@ -41,6 +41,9 @@ public class Product {
     private String thumbnail;
 
     @Column(columnDefinition = "TEXT")
+    private String images; // JSON or comma-separated URLs for photo album
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     // Technical specifications (for FPT Shop style specs sheet)

@@ -26,4 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderStatus = 'PENDING'")
     Long countPendingOrders();
+
+    @Query("SELECT COUNT(oi) > 0 FROM OrderItem oi WHERE oi.order.user.id = :userId AND oi.product.id = :productId AND oi.order.orderStatus = com.ecommerce.backend.entity.OrderStatus.COMPLETED")
+    boolean existsCompletedOrderByUserAndProduct(@org.springframework.data.repository.query.Param("userId") Long userId, @org.springframework.data.repository.query.Param("productId") Long productId);
 }

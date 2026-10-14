@@ -40,6 +40,20 @@ public class Order {
     private String note;
 
     @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal subtotalAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal shippingFee = BigDecimal.ZERO;
+
+    private String voucherCode;
+
+    @Column(nullable = false)
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
@@ -56,6 +70,9 @@ public class Order {
     @Column(nullable = false)
     @Builder.Default
     private OrderStatus orderStatus = OrderStatus.PENDING;
+
+    @Column(length = 500)
+    private String cancelReason;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

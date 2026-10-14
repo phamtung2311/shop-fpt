@@ -22,6 +22,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
+    private final VoucherRepository voucherRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -38,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
                     .phone("0988888888")
                     .address("Hà Nội, Việt Nam")
                     .role(Role.ROLE_ADMIN)
-                    .active(true)
+                    .isActive(true)
                     .build());
 
             customer = userRepository.save(User.builder()
@@ -48,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
                     .phone("0912345678")
                     .address("Đống Đa, Hà Nội")
                     .role(Role.ROLE_CUSTOMER)
-                    .active(true)
+                    .isActive(true)
                     .build());
         } else {
             admin = userRepository.findByEmail("admin@fptshop.com").orElse(null);
@@ -89,6 +90,7 @@ public class DataInitializer implements CommandLineRunner {
                     .salePrice(new BigDecimal("31490000"))
                     .stockQuantity(25)
                     .thumbnail("https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80")
+                    .images("[\"https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80\", \"https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800&auto=format&fit=crop&q=80\", \"https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&fit=crop&q=80\"]")
                     .description("Siêu phẩm iPhone 16 Pro Max khung viền Titan cao cấp, trang bị chip A18 Pro tiến trình 3nm, hệ thống camera 48MP zoom quang học 5x sắc nét và nút Camera Control cảm ứng hoàn toàn mới.")
                     .cpu("Apple A18 Pro 6 nhân")
                     .ram("8GB")
@@ -111,6 +113,7 @@ public class DataInitializer implements CommandLineRunner {
                     .salePrice(new BigDecimal("26990000"))
                     .stockQuantity(30)
                     .thumbnail("https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&auto=format&fit=crop&q=80")
+                    .images("[\"https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&auto=format&fit=crop&q=80\", \"https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&fit=crop&q=80\"]")
                     .description("Chiến binh flagship quyền năng với hệ thống Galaxy AI đột phá, màn hình phẳng Dynamic AMOLED 2X 6.8 inch 120Hz, camera zoom 100x và bút S-Pen tích hợp.")
                     .cpu("Snapdragon 8 Gen 3 for Galaxy")
                     .ram("12GB")
@@ -810,6 +813,7 @@ public class DataInitializer implements CommandLineRunner {
                         .authorName("Trần Hoàng Nam")
                         .rating(5)
                         .content("Hàng chính hãng FPT nguyên seal 100%, máy màu Titan Sa Mạc bên ngoài sang hơn trong ảnh nhiều. Màn hình 120Hz siêu mượt và camera zoom quang 5x rất nét!")
+                        .verifiedPurchase(true)
                         .createdAt(LocalDateTime.now().minusDays(3))
                         .build());
                 reviewRepository.save(Review.builder()
@@ -817,6 +821,7 @@ public class DataInitializer implements CommandLineRunner {
                         .authorName("Lê Minh Quân")
                         .rating(5)
                         .content("Giao hàng siêu tốc đúng 2 tiếng nội thành. Nhân viên hướng dẫn kích hoạt bảo hành điện tử chu đáo.")
+                        .verifiedPurchase(true)
                         .createdAt(LocalDateTime.now().minusDays(5))
                         .build());
             });
@@ -827,6 +832,7 @@ public class DataInitializer implements CommandLineRunner {
                         .authorName("Nguyễn Đức Huy")
                         .rating(5)
                         .content("Đỉnh cao laptop gaming! Màn Mini LED rực rỡ, card RTX 4080 kéo Black Myth Wukong 2K max settings mượt mà 120 fps. Hệ thống tản nhiệt 3 quạt cực êm.")
+                        .verifiedPurchase(true)
                         .createdAt(LocalDateTime.now().minusDays(2))
                         .build());
             });
@@ -837,6 +843,7 @@ public class DataInitializer implements CommandLineRunner {
                         .authorName("Hoàng Văn Phúc")
                         .rating(5)
                         .content("Xứng danh vua CPU gaming, 96MB cache 3D kéo FPS game CS2 và Valorant cực kỳ ổn định, không hề bị drop frame!")
+                        .verifiedPurchase(true)
                         .createdAt(LocalDateTime.now().minusDays(4))
                         .build());
             });
@@ -847,11 +854,63 @@ public class DataInitializer implements CommandLineRunner {
                         .authorName("Đặng Thu Thảo")
                         .rating(5)
                         .content("Máy màu Space Black rất ít bám vân tay, render video 4K Final Cut Pro nhanh như chớp mà máy vẫn mát rượi, pin dùng từ sáng đến tối chưa hết.")
+                        .verifiedPurchase(true)
                         .createdAt(LocalDateTime.now().minusDays(1))
                         .build());
             });
 
             log.info("==> Seeded authentic reviews successfully!");
+        }
+
+        // Initialize Vouchers if not present
+        if (voucherRepository.count() == 0) {
+            log.info("==> Seeding initial vouchers...");
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime oneYearLater = now.plusYears(1);
+
+            voucherRepository.save(Voucher.builder()
+                    .code("FPTSHOP10")
+                    .description("Giảm 10% tối đa 500.000đ cho đơn hàng từ 1.000.000đ")
+                    .discountType(DiscountType.PERCENTAGE)
+                    .discountValue(BigDecimal.valueOf(10))
+                    .minOrderValue(BigDecimal.valueOf(1000000))
+                    .maxDiscountAmount(BigDecimal.valueOf(500000))
+                    .usageLimit(100)
+                    .usedCount(0)
+                    .startDate(now)
+                    .endDate(oneYearLater)
+                    .isActive(true)
+                    .build());
+
+            voucherRepository.save(Voucher.builder()
+                    .code("GIAM200K")
+                    .description("Giảm ngay 200.000đ cho đơn hàng từ 3.000.000đ")
+                    .discountType(DiscountType.FIXED_AMOUNT)
+                    .discountValue(BigDecimal.valueOf(200000))
+                    .minOrderValue(BigDecimal.valueOf(3000000))
+                    .maxDiscountAmount(null)
+                    .usageLimit(50)
+                    .usedCount(0)
+                    .startDate(now)
+                    .endDate(oneYearLater)
+                    .isActive(true)
+                    .build());
+
+            voucherRepository.save(Voucher.builder()
+                    .code("BUILDPC1TR")
+                    .description("Giảm 1.000.000đ cho đơn build PC / mua sắm từ 15.000.000đ")
+                    .discountType(DiscountType.FIXED_AMOUNT)
+                    .discountValue(BigDecimal.valueOf(1000000))
+                    .minOrderValue(BigDecimal.valueOf(15000000))
+                    .maxDiscountAmount(null)
+                    .usageLimit(30)
+                    .usedCount(0)
+                    .startDate(now)
+                    .endDate(oneYearLater)
+                    .isActive(true)
+                    .build());
+
+            log.info("==> Seeded initial vouchers successfully!");
         }
     }
 }

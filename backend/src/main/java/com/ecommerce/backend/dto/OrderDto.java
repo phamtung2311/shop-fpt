@@ -24,10 +24,15 @@ public class OrderDto {
     private String customerPhone;
     private String shippingAddress;
     private String note;
+    private BigDecimal subtotalAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal shippingFee;
+    private String voucherCode;
     private BigDecimal totalAmount;
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
+    private String cancelReason;
     private List<OrderItemDto> items;
     private LocalDateTime createdAt;
 }

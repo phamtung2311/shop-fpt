@@ -52,65 +52,91 @@ export const CartPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Cart Item List */}
         <div className="lg:col-span-8 space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.product.id}
-              className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
-            >
-              <div className="flex items-center space-x-4 min-w-0 w-full sm:w-auto">
-                <img
-                  src={item.product.thumbnail}
-                  alt={item.product.name}
-                  className="w-16 h-16 object-contain rounded bg-slate-50 shrink-0 p-1"
-                />
-                <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">
-                    {item.product.brand}
+          {items.map((item) => {
+            const unitPrice = item.product.salePrice + (item.warrantyOption?.price || 0);
+            const itemKey = `${item.product.id}-${item.warrantyOption?.id || 'std'}-${item.installmentNote || ''}`;
+
+            return (
+              <div
+                key={itemKey}
+                className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
+              >
+                <div className="flex items-center space-x-4 min-w-0 w-full sm:w-auto">
+                  <img
+                    src={item.product.thumbnail}
+                    alt={item.product.name}
+                    className="w-16 h-16 object-contain rounded bg-slate-50 shrink-0 p-1"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">
+                      {item.product.brand}
+                    </span>
+                    <Link
+                      to={`/product/${item.product.slug}`}
+                      className="block font-bold text-sm text-slate-900 hover:text-red-600 truncate"
+                    >
+                      {item.product.name}
+                    </Link>
+
+                    {/* Warranty option badge */}
+                    {item.warrantyOption && (
+                      <div className="flex items-center space-x-1 mt-1 text-[11px] text-slate-600">
+                        <ShieldCheck className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                        <span className="font-semibold">{item.warrantyOption.name}</span>
+                        {item.warrantyOption.price > 0 && (
+                          <span className="text-red-600 font-bold">
+                            (+{formatCurrency(item.warrantyOption.price)})
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Installment note */}
+                    {item.installmentNote && (
+                      <p className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1 inline-block">
+                        {item.installmentNote}
+                      </p>
+                    )}
+
+                    <p className="text-xs font-bold text-red-600 mt-0.5">
+                      Đơn giá: {formatCurrency(unitPrice)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quantity & Controls */}
+                <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-6">
+                  <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50">
+                    <button
+                      onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.warrantyOption?.id)}
+                      className="px-2.5 py-1 text-xs font-bold hover:bg-slate-200"
+                    >
+                      -
+                    </button>
+                    <span className="px-3 py-1 text-xs font-bold">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.warrantyOption?.id)}
+                      className="px-2.5 py-1 text-xs font-bold hover:bg-slate-200"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <span className="text-sm font-black text-slate-900 min-w-[100px] text-right">
+                    {formatCurrency(unitPrice * item.quantity)}
                   </span>
-                  <Link
-                    to={`/product/${item.product.slug}`}
-                    className="block font-bold text-sm text-slate-900 hover:text-red-600 truncate"
-                  >
-                    {item.product.name}
-                  </Link>
-                  <p className="text-xs font-bold text-red-600 mt-0.5">
-                    {formatCurrency(item.product.salePrice)}
-                  </p>
-                </div>
-              </div>
 
-              {/* Quantity & Controls */}
-              <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-6">
-                <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50">
                   <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                    className="px-2.5 py-1 text-xs font-bold hover:bg-slate-200"
+                    onClick={() => removeFromCart(item.product.id, item.warrantyOption?.id)}
+                    className="text-slate-400 hover:text-red-600 p-1"
+                    title="Xóa món"
                   >
-                    -
-                  </button>
-                  <span className="px-3 py-1 text-xs font-bold">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                    className="px-2.5 py-1 text-xs font-bold hover:bg-slate-200"
-                  >
-                    +
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-
-                <span className="text-sm font-black text-slate-900 min-w-[100px] text-right">
-                  {formatCurrency(item.product.salePrice * item.quantity)}
-                </span>
-
-                <button
-                  onClick={() => removeFromCart(item.product.id)}
-                  className="text-slate-400 hover:text-red-600 p-1"
-                  title="Xóa món"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Checkout Summary Box */}

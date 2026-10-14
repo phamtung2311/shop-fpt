@@ -16,8 +16,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,6 +110,38 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private String serializeImages(List<String> images) {
+        if (images == null || images.isEmpty()) return null;
+        try {
+            return objectMapper.writeValueAsString(images);
+        } catch (Exception e) {
+            return String.join("|||", images);
+        }
+    }
+
+    private List<String> deserializeImages(String imagesStr, String thumbnail) {
+        List<String> result = new ArrayList<>();
+        if (imagesStr != null && !imagesStr.isBlank()) {
+            try {
+                if (imagesStr.trim().startsWith("[")) {
+                    result = objectMapper.readValue(imagesStr, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+                } else {
+                    result = new ArrayList<>(Arrays.asList(imagesStr.split("\\|\\|\\|")));
+                }
+            } catch (Exception e) {
+                result = new ArrayList<>(Arrays.asList(imagesStr.split("\\|\\|\\|")));
+            }
+        }
+        if (result.isEmpty() && thumbnail != null && !thumbnail.isBlank()) {
+            result.add(thumbnail);
+        } else if (!result.isEmpty() && thumbnail != null && !thumbnail.isBlank() && !result.contains(thumbnail)) {
+            result.add(0, thumbnail);
+        }
+        return result;
+    }
+
     @Transactional
     public ProductDto createProduct(ProductDto dto) {
         Category category = null;
@@ -128,6 +162,7 @@ public class ProductService {
                 .salePrice(dto.getSalePrice())
                 .stockQuantity(dto.getStockQuantity() != null ? dto.getStockQuantity() : 50)
                 .thumbnail(dto.getThumbnail())
+                .images(serializeImages(dto.getImages()))
                 .description(dto.getDescription())
                 .cpu(dto.getCpu())
                 .ram(dto.getRam())
@@ -162,6 +197,7 @@ public class ProductService {
         product.setSalePrice(dto.getSalePrice());
         if (dto.getStockQuantity() != null) product.setStockQuantity(dto.getStockQuantity());
         if (dto.getThumbnail() != null) product.setThumbnail(dto.getThumbnail());
+        if (dto.getImages() != null) product.setImages(serializeImages(dto.getImages()));
         if (dto.getDescription() != null) product.setDescription(dto.getDescription());
         product.setCpu(dto.getCpu());
         product.setRam(dto.getRam());
@@ -195,6 +231,7 @@ public class ProductService {
                 .salePrice(product.getSalePrice())
                 .stockQuantity(product.getStockQuantity())
                 .thumbnail(product.getThumbnail())
+                .images(deserializeImages(product.getImages(), product.getThumbnail()))
                 .description(product.getDescription())
                 .cpu(product.getCpu())
                 .ram(product.getRam())

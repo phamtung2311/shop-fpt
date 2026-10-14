@@ -11,9 +11,12 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderSuccessPage } from './pages/OrderSuccessPage';
 import { MyOrdersPage } from './pages/MyOrdersPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { ComparePage } from './pages/ComparePage';
+import { FloatingCompareBar } from './components/FloatingCompareBar';
 
 export const App: React.FC = () => {
   return (
@@ -25,17 +28,20 @@ export const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
+            <Route path="/compare" element={<ComparePage />} />
             <Route path="/pc-builder" element={<PCBuilderPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-success/:orderCode" element={<OrderSuccessPage />} />
             <Route path="/my-orders" element={<MyOrdersPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
           </Routes>
         </main>
         <Footer />
+        <FloatingCompareBar />
         <ToastContainer />
       </div>
     </BrowserRouter>

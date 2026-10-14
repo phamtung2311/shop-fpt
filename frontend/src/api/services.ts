@@ -13,6 +13,12 @@ import {
   Product,
   RegisterRequest,
   Review,
+  UserProfile,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+  Voucher,
+  ApplyVoucherResponse,
+  VoucherRequest,
 } from '../types';
 
 export const authApi = {
@@ -89,6 +95,14 @@ export const orderApi = {
     const res = await api.get<ApiResponse<Order[]>>('/orders/my-orders');
     return res.data;
   },
+  cancelOrder: async (id: number, cancelReason?: string) => {
+    const res = await api.patch<ApiResponse<Order>>(`/orders/${id}/cancel`, { cancelReason });
+    return res.data;
+  },
+  confirmPayment: async (orderId: number) => {
+    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/confirm-payment`);
+    return res.data;
+  },
 };
 
 export const reviewApi = {
@@ -137,6 +151,73 @@ export const adminApi = {
   },
   deleteCategory: async (id: number) => {
     const res = await api.delete<ApiResponse<void>>('/admin/categories/' + id);
+    return res.data;
+  },
+  getUsers: async () => {
+    const res = await api.get<ApiResponse<UserProfile[]>>('/admin/users');
+    return res.data;
+  },
+  updateUserRole: async (id: number, role: 'ROLE_CUSTOMER' | 'ROLE_ADMIN' | string) => {
+    const res = await api.patch<ApiResponse<UserProfile>>(`/admin/users/${id}/role`, { role });
+    return res.data;
+  },
+  toggleUserStatus: async (id: number) => {
+    const res = await api.patch<ApiResponse<UserProfile>>(`/admin/users/${id}/status`);
+    return res.data;
+  },
+  getVouchers: async () => {
+    const res = await api.get<ApiResponse<Voucher[]>>('/admin/vouchers');
+    return res.data;
+  },
+  createVoucher: async (data: VoucherRequest) => {
+    const res = await api.post<ApiResponse<Voucher>>('/admin/vouchers', data);
+    return res.data;
+  },
+  updateVoucher: async (id: number, data: VoucherRequest) => {
+    const res = await api.put<ApiResponse<Voucher>>(`/admin/vouchers/${id}`, data);
+    return res.data;
+  },
+  deleteVoucher: async (id: number) => {
+    const res = await api.delete<ApiResponse<void>>(`/admin/vouchers/${id}`);
+    return res.data;
+  },
+};
+
+export const userApi = {
+  getProfile: async () => {
+    const res = await api.get<ApiResponse<UserProfile>>('/users/profile');
+    return res.data;
+  },
+  updateProfile: async (data: UpdateProfileRequest) => {
+    const res = await api.put<ApiResponse<UserProfile>>('/users/profile', data);
+    return res.data;
+  },
+  changePassword: async (data: ChangePasswordRequest) => {
+    const res = await api.put<ApiResponse<string>>('/users/change-password', data);
+    return res.data;
+  },
+};
+
+export const voucherApi = {
+  applyVoucher: async (code: string, subtotal: number) => {
+    const res = await api.post<ApiResponse<ApplyVoucherResponse>>('/vouchers/apply', { code, subtotal });
+    return res.data;
+  },
+  getActiveVouchers: async () => {
+    const res = await api.get<ApiResponse<Voucher[]>>('/vouchers/active');
+    return res.data;
+  },
+};
+
+export const uploadApi = {
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post<ApiResponse<{ url: string; filename: string }>>('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
 };

@@ -25,5 +25,7 @@ public class ReviewDto {
     @NotBlank(message = "Nội dung nhận xét không được để trống")
     private String content;
 
+    private Boolean verifiedPurchase;
+
     private String createdAt;
 }

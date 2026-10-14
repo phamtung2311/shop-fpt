@@ -42,9 +42,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(
+                                "/uploads/**",
                                 "/api/auth/**",
                                 "/api/products/**",
                                 "/api/categories/**",
+                                "/api/vouchers/**",
                                 "/api/pc-builder/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -54,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").permitAll() // Allow guest checkout!
                         // Admin endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**", "/api/upload/**").hasRole("ADMIN")
                         // Any other request
                         .anyRequest().authenticated()
                 )

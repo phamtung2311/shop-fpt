@@ -36,6 +36,8 @@ public class ProductDto {
 
     private Integer stockQuantity;
     private String thumbnail;
+    @Builder.Default
+    private java.util.List<String> images = new java.util.ArrayList<>();
     private String description;
 
     // Specs

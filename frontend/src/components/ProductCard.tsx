@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ShoppingCart, Cpu, HardDrive } from 'lucide-react';
+import { Star, ShoppingCart, Cpu, HardDrive, Scale } from 'lucide-react';
 import { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
+import { useCompareStore } from '../store/compareStore';
 import { useToastStore } from '../store/toastStore';
 
 interface ProductCardProps {
@@ -16,7 +17,8 @@ export const formatCurrency = (val: number) => {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const showToast = useToastStore((state) => state.showToast);
-
+  const { isInCompare, addProduct, removeProduct } = useCompareStore();
+  const inCompare = isInCompare(product.id);
 
   const discountPercent = Math.round(
     ((product.originalPrice - product.salePrice) / product.originalPrice) * 100
@@ -101,18 +103,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="text-slate-400 text-[10px] ml-1">({product.reviewCount || 10})</span>
             </div>
 
-            <button
-              onClick={() => {
-                addToCart(product, 1);
-                showToast(`Đã thêm ${product.name} vào giỏ hàng!`, 'success');
-              }}
-              className="flex items-center space-x-1 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-              title="Thêm vào giỏ hàng"
-            >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              <span>Mua</span>
-            </button>
+            <div className="flex items-center space-x-1.5">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (inCompare) {
+                    removeProduct(product.id);
+                  } else {
+                    addProduct(product);
+                  }
+                }}
+                className={`flex items-center space-x-1 px-2 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  inCompare
+                    ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
+                    : 'border-slate-200 text-slate-600 hover:border-red-400 hover:text-red-600 hover:bg-red-50'
+                }`}
+                title={inCompare ? 'Bỏ so sánh' : 'So sánh sản phẩm này'}
+              >
+                <Scale className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{inCompare ? 'Đã chọn' : 'So sánh'}</span>
+              </button>
 
+              <button
+                onClick={() => {
+                  addToCart(product, 1);
+                  showToast(`Đã thêm ${product.name} vào giỏ hàng!`, 'success');
+                }}
+                className="flex items-center space-x-1 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                title="Thêm vào giỏ hàng"
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>Mua</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
